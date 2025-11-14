@@ -1,0 +1,32 @@
+{
+  "name": "polymarket-price-collector",
+  "version": "1.0.0",
+  "description": "Automated price data collection for Polymarket markets",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "collect": "tsx src/collect-prices.ts",
+    "start": "npm run build && node dist/collect-prices.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "polymarket",
+    "price-tracking",
+    "prediction-markets"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/pg": "^8.11.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
