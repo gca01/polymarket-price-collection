@@ -27,7 +27,7 @@ This collector:
 In your existing PostgreSQL database, run the migration:
 
 ```bash
-psql $DATABASE_URL -f migrations/005_add_price_tracking.sql
+psql $DATABASE_URL -f migrations/001_add_price_tracking.sql
 ```
 
 This creates:
@@ -161,7 +161,7 @@ npm run collect
 
 ### "No active games found"
 
-Your `games` table is empty or has no upcoming games. Run your main dashboard first to populate games.
+Your `games` table is empty or has no upcoming games. Populate your games table with active games.
 
 ### "Connection failed"
 
