@@ -123,7 +123,7 @@ export async function getActiveGames(): Promise<
     markets: Array<{
       marketSlug: string;
       outcomes: Array<{
-        outcome: string;
+        title: string;
         tokenID: string;
       }>;
     }>;
@@ -151,7 +151,10 @@ export async function getActiveGames(): Promise<
   return result.rows.map((row: any) => ({
     id: row.id,
     title: row.title,
-    markets: row.markets || [],
+    // Only include moneyline markets
+    markets: (row.markets || []).filter((market: any) => {
+      return market.sportsMarketType === 'moneyline';
+    }),
   }));
 }
 
