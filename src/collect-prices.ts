@@ -1,6 +1,9 @@
 /**
  * Polymarket Price Collector
  * Fetches current prices for active markets and stores them in the database
+ *
+ * Optimization: Uses token IDs from Gamma API (clobTokenIds field) stored in database
+ * instead of making extra CLOB API calls to /markets endpoint. This reduces API calls by ~33%.
  */
 
 import {
@@ -98,12 +101,15 @@ async function collectPrices(): Promise<void> {
       console.log(`\n[GAME] ${game.title} (${game.id})`);
 
       for (const market of game.markets) {
+        // Check if market has outcomes with token IDs (from Gamma API clobTokenIds)
         if (!market.outcomes || market.outcomes.length === 0) {
           console.log(`Warning: No outcomes for market ${market.marketSlug}`);
           continue;
         }
 
+        // Fetch price for each outcome
         for (const outcome of market.outcomes) {
+          // Skip outcomes without token IDs
           if (!outcome.tokenID) {
             console.log(`Warning: No token ID for outcome: ${outcome.outcome}`);
             continue;
