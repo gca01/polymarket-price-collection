@@ -1,0 +1,11 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm run collect"
+restartPolicyType = "NEVER"
+
+# Cron schedule - runs every 5 minutes
+[[crons]]
+schedule = "*/5 * * * *"
+command = "npm run collect"
