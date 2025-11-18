@@ -123,7 +123,7 @@ export async function getActiveGames(): Promise<
     markets: Array<{
       marketSlug: string;
       outcomes: Array<{
-        title: string;
+        outcome: string;
         tokenID: string;
       }>;
     }>;
