@@ -128,7 +128,7 @@ async function collectPrices(): Promise<void> {
 
           if (price !== null) {
             priceRecords.push({
-              conditionId: game.id,
+              conditionId: market.conditionId,
               tokenId: outcome.tokenID,
               outcome: outcome.outcome,
               price,
