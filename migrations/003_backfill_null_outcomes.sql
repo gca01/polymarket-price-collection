@@ -13,14 +13,14 @@ WITH token_outcome_mapping AS (
   SELECT
     m->>'conditionId' as condition_id,
     o->>'tokenID' as token_id,
-    o->>'outcome' as outcome_name,
+    o->>'title' as outcome_name,
     g.title as game_title
   FROM games g,
     jsonb_array_elements(g.markets) m,
     jsonb_array_elements(m->'outcomes') o
   WHERE m->>'conditionId' IS NOT NULL
     AND o->>'tokenID' IS NOT NULL
-    AND o->>'outcome' IS NOT NULL
+    AND o->>'title' IS NOT NULL
 )
 SELECT
   mp.condition_id,
@@ -59,13 +59,13 @@ WITH token_outcome_mapping AS (
   SELECT
     m->>'conditionId' as condition_id,
     o->>'tokenID' as token_id,
-    o->>'outcome' as outcome_name
+    o->>'title' as outcome_name
   FROM games g,
     jsonb_array_elements(g.markets) m,
     jsonb_array_elements(m->'outcomes') o
   WHERE m->>'conditionId' IS NOT NULL
     AND o->>'tokenID' IS NOT NULL
-    AND o->>'outcome' IS NOT NULL
+    AND o->>'title' IS NOT NULL
 )
 UPDATE market_prices mp
 SET outcome = tom.outcome_name
@@ -82,13 +82,13 @@ WITH token_outcome_mapping AS (
   SELECT
     m->>'conditionId' as condition_id,
     o->>'tokenID' as token_id,
-    o->>'outcome' as outcome_name
+    o->>'title' as outcome_name
   FROM games g,
     jsonb_array_elements(g.markets) m,
     jsonb_array_elements(m->'outcomes') o
   WHERE m->>'conditionId' IS NOT NULL
     AND o->>'tokenID' IS NOT NULL
-    AND o->>'outcome' IS NOT NULL
+    AND o->>'title' IS NOT NULL
 )
 UPDATE market_price_extremes mpe
 SET outcome = tom.outcome_name

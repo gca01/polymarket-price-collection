@@ -124,7 +124,7 @@ export async function getActiveGames(): Promise<
       conditionId: string;
       marketSlug: string;
       outcomes: Array<{
-        outcome: string;
+        title: string;
         tokenID: string;
       }>;
     }>;
