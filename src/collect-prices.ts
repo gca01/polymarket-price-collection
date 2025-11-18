@@ -111,7 +111,7 @@ async function collectPrices(): Promise<void> {
         for (const outcome of market.outcomes) {
           // Skip outcomes without token IDs
           if (!outcome.tokenID) {
-            console.log(`Warning: No token ID for outcome: ${outcome.title}`);
+            console.log(`Warning: No token ID for outcome: ${outcome.outcome}`);
             continue;
           }
 
@@ -130,18 +130,18 @@ async function collectPrices(): Promise<void> {
             priceRecords.push({
               conditionId: game.id,
               tokenId: outcome.tokenID,
-              outcome: outcome.title,
+              outcome: outcome.outcome,
               price,
               timestamp,
               source: "rest",
             });
             successCount++;
             console.log(
-              `Success ${outcome.title}: ${price}`
+              `Success ${outcome.outcome}: ${price}`
             );
           } else {
             failureCount++;
-            console.log(`Failure ${outcome.title}: Failed to fetch price`);
+            console.log(`Failure ${outcome.outcome}: Failed to fetch price`);
           }
 
           // Small delay between requests
