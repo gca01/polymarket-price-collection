@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "collect": "tsx src/collect-prices.ts",
-    "start": "npm run build && node dist/collect-prices.js",
+    "scheduler": "tsx src/scheduler.ts",
+    "start": "npm run scheduler",
     "test": "echo \"No tests yet\" && exit 0"
   },
   "keywords": [

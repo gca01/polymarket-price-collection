@@ -2,10 +2,9 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "npm run collect"
-restartPolicyType = "NEVER"
+startCommand = "npm run scheduler"
+restartPolicyType = "ON_FAILURE"
 
-# Cron schedule - runs every 5 minutes
-[[crons]]
-schedule = "*/5 * * * *"
-command = "npm run collect"
+# Dynamic scheduler that adjusts collection frequency:
+# - 2 minutes when games start within 10 min or are active
+# - 10 minutes during normal operation
