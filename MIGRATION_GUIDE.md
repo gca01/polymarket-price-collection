@@ -1,10 +1,14 @@
-# Migration Guide: Fixing condition_id Format
+# Migration Guide: Fixing Data Issues
 
 ## Background
 
-Previously, the price collector was storing the internal game ID (e.g., `"82104"`) in the `condition_id` field instead of the blockchain conditionId (e.g., `"0xb21f2a16078a8fa010cf7d7ff57782166c61f2069f3c98b6392eb6ab180a4bd4"`).
+There were two data quality issues in the price collection:
 
-This has been fixed in the code, but existing records in the database still have the wrong format.
+1. **Incorrect condition_id format**: The collector was storing internal game IDs (e.g., `"82104"`) instead of blockchain conditionIds (e.g., `"0xb21f2a16078a8fa010cf7d7ff57782166c61f2069f3c98b6392eb6ab180a4bd4"`)
+
+2. **NULL outcome values**: Some records have NULL in the `outcome` column
+
+Both issues have been fixed in the code, but existing records in the database need to be updated.
 
 ## You Have Two Options
 
@@ -84,12 +88,59 @@ GROUP BY 1;
 
 ---
 
-## After Migration
+## After Migration: Fix NULL Outcomes
 
-Both options result in:
+After fixing the condition_id values, you may have records with NULL in the `outcome` column. This needs to be fixed separately.
+
+### Migration 003: Backfill NULL Outcomes
+
+**File:** `migrations/003_backfill_null_outcomes.sql`
+
+**Prerequisites:**
+- condition_id must already be fixed (should be in hex format like `0x...`)
+
+**Steps:**
+
+1. **Check if you have NULL outcomes:**
+   ```bash
+   psql $DATABASE_URL -c "SELECT COUNT(*) FROM market_prices WHERE outcome IS NULL;"
+   ```
+
+2. **Preview the changes:**
+   ```bash
+   psql $DATABASE_URL -f migrations/003_backfill_null_outcomes.sql --single-transaction
+   ```
+   Review the preview to verify the outcome names look correct
+
+3. **Run the migration:**
+   ```bash
+   psql $DATABASE_URL -f migrations/003_backfill_null_outcomes.sql
+   ```
+
+**What it does:**
+- Joins with games table using both condition_id and token_id
+- Finds the correct outcome name for each NULL outcome
+- Updates both `market_prices` and `market_price_extremes` tables
+- Only updates NULL values (leaves existing outcomes alone)
+
+**Verification:**
+```sql
+-- Check for remaining NULLs
+SELECT COUNT(*) as remaining_nulls
+FROM market_prices
+WHERE outcome IS NULL;
+```
+
+---
+
+## Complete Migration Summary
+
+After running all migrations:
 - ✅ All future price collections use correct conditionId format
+- ✅ All future price collections have outcome values
 - ✅ Frontend queries work correctly with `conditionId`
-- ✅ No invalid data in the database
+- ✅ Historical data is complete and accurate
+- ✅ No invalid or missing data in the database
 
 ---
 
@@ -103,6 +154,17 @@ Both options result in:
 
 ---
 
+## Migration Order
+
+If you're running multiple migrations, do them in this order:
+
+1. **First:** Fix condition_id (002_backfill_condition_ids.sql OR 002_delete_old_prices_ALTERNATIVE.sql)
+2. **Second:** Fix NULL outcomes (003_backfill_null_outcomes.sql)
+
+The NULL outcomes migration depends on having correct condition_id values.
+
+---
+
 ## Questions?
 
 - **How do I know which option to use?**
@@ -110,13 +172,18 @@ Both options result in:
   If it's less than a week old, delete is fine.
 
 - **Can I test the backfill first?**
-  Yes! Run the preview query from `002_backfill_condition_ids.sql` to see what would change.
+  Yes! Run the preview query from any migration file with `--single-transaction` to see what would change.
 
 - **What if some records can't be mapped?**
-  The backfill script only updates records where it can find a matching token_id in the games table. Records that can't be mapped are left unchanged (you can delete them manually later).
+  The backfill scripts only update records where they can find a matching token_id in the games table. Records that can't be mapped are left unchanged (you can delete them manually later).
+
+- **Do I need to run the NULL outcomes migration?**
+  Check first: `SELECT COUNT(*) FROM market_prices WHERE outcome IS NULL;`
+  If the count is 0, you can skip migration 003.
 
 - **Is this safe to run on production?**
   Yes, but always:
   1. Test on a backup first if possible
   2. Run during low-traffic times
   3. Review the preview queries before executing
+  4. Run migrations in the correct order (002 before 003)
