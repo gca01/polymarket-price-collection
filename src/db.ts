@@ -111,10 +111,8 @@ export async function batchInsertPrices(
 
 /**
  * Get active games that need price tracking
- * Only returns games that are:
- * 1. Starting within the next 48 hours, OR
- * 2. Already started but not yet ended (live games)
- * This prevents collecting prices for games that are weeks away
+ * Returns all games that are not marked as closed
+ * Price collection continues until a game is explicitly marked as closed
  */
 export async function getActiveGames(): Promise<
   Array<{
@@ -138,14 +136,6 @@ export async function getActiveGames(): Promise<
     `SELECT id, title, markets
       FROM games
       WHERE closed = false
-        AND end_date > NOW()
-        AND (
-        -- Games that have already started but not ended (live games)
-        (start_date <= NOW() AND end_date > NOW())
-        OR
-        -- Games starting within the next 48 hours
-        (start_date > NOW() AND start_date < NOW() + INTERVAL '48 hours')
-      )
     ORDER BY start_date ASC`
   );
 
