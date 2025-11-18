@@ -57,6 +57,35 @@ WHERE mp.token_id = tc.token_id
 -- ============================================================
 -- STEP 2: Update market_price_extremes table
 -- ============================================================
+-- This is more complex because we need to handle duplicates
+-- Strategy: Delete old non-hex records, keep existing hex records
+WITH token_to_condition AS (
+  SELECT
+    m->>'conditionId' as condition_id,
+    o->>'tokenID' as token_id
+  FROM games g,
+    jsonb_array_elements(g.markets) m,
+    jsonb_array_elements(m->'outcomes') o
+  WHERE m->>'conditionId' IS NOT NULL
+    AND o->>'tokenID' IS NOT NULL
+),
+records_to_delete AS (
+  SELECT mpe.id
+  FROM market_price_extremes mpe
+  JOIN token_to_condition tc ON mpe.token_id = tc.token_id
+  WHERE mpe.condition_id NOT LIKE '0x%'  -- Old non-hex records
+    AND EXISTS (
+      -- Check if a hex version already exists
+      SELECT 1 FROM market_price_extremes existing
+      WHERE existing.condition_id = tc.condition_id
+        AND existing.token_id = tc.token_id
+        AND existing.condition_id LIKE '0x%'
+    )
+)
+DELETE FROM market_price_extremes
+WHERE id IN (SELECT id FROM records_to_delete);
+
+-- Now update remaining non-hex records (ones that don't have hex duplicates)
 WITH token_to_condition AS (
   SELECT
     m->>'conditionId' as condition_id,
