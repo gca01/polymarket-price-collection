@@ -188,6 +188,9 @@ async function main(): Promise<void> {
   }
 }
 
+// Export for use by scheduler
+export { collectPrices };
+
 // Run if executed directly
 if (require.main === module) {
   main();

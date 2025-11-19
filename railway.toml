@@ -1,0 +1,10 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm run scheduler"
+restartPolicyType = "ON_FAILURE"
+
+# Dynamic scheduler that adjusts collection frequency:
+# - 2 minutes when games start within 10 min or are active
+# - 10 minutes during normal operation
